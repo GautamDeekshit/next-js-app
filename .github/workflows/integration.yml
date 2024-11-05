@@ -1,51 +1,17 @@
 
-name: Integration
+name: Deploy
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
-  build:
+  deploy:
 
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
-
     steps:
     - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - name: "Installing Dependencies"
-      run: npm i
-
-    - name: "Build command"
-      run: npm run build
-
-  unit-tests:
-
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
-
-    steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - name: "Installing Dependencies"
-      run: npm i
-
-    - name: "Running test cases"
-      run: npm run test
+    - run: docker build -t gautam9611/nodeapp .
+    - run: echo "${{DOCKERHUB_PASSWORD}}" | docker login -u ${{DOCKERHUB_USERNAME}} --password-stdin
+    - run: docker push gautam9611/nodeapp:latest
